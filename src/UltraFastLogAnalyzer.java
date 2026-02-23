@@ -30,6 +30,46 @@ public class UltraFastLogAnalyzer
                 this.p=p; 
             }
 
-        
+        protected List<Long> compute()
+        {
+            if (e - s < 1024 * 1024)
+                return search(); 
+
+            long m = s + (e - s) / 2;
+            
+            SearchTask t1 = new SearchTask(ch, s, m, p);
+            SearchTask t2 = new SearchTask(ch, m, e, p);
+            
+            t1.fork();
+            List<Long> r = t2.compute(); r.addAll(t1.join());
+            return r;
+        }
+        private List<Long> search()
+        {
+            List<Long> found = new ArrayList<>();
+            try
+            {
+                MappedByteBuffer mb = ch.map(FileChannel.MapMode.READ_ONLY, s, e - s);
+                for (int i = 0; i <= mb.limit() - p.length; i++)
+                {
+                    boolean m = true;
+                    for (int j = 0; j < p.length; j++) 
+                        if (mb.get(i+j) != p[j])
+                        { 
+                            m=false; 
+                            break; 
+                        }
+                    
+                    if (m) 
+                        found.add(s + i);
+                }
+            } 
+            catch (Exception ex) 
+            {
+                ex.printStackTrace();
+            }
+            return found;
+        }
     }
 }
+
