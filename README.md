@@ -32,7 +32,7 @@ TurboLog/
 
 ---
 
-# ⚙ Components
+#  Components
 
 ## 1️ LogGenerator
 
